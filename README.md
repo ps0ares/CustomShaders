@@ -26,7 +26,7 @@ Example shaders may be found in the [`examples`](examples) directory of
 this repository. It is a good starting point for the creation of custom
 effects.
 
-![Demo](test.webp)
+![Demo](default.webp)
 
 ## What are Shaders?
 
@@ -206,86 +206,3 @@ The user-facing text describing the variable. Displayed in the OBS UI.
 
 -   Access to raw audio signal, without FFT
 -   Specifying textures by a path to an image file
-
-## Development
-
-### Building
-
-#### Windows
-
-1.  Install Rust by following instructions at <https://rustup.rs/>
-
-2.  Install CLang: Download and install the official pre-built binary
-    from [LLVM download page](http://releases.llvm.org/download.html)
-
-3.  Compile OBS by following [these
-    instructions](https://github.com/obsproject/obs-studio/wiki/Install-Instructions#windows-build-directions)
-
-    -   This will require the installation of *Visual Studio Build Tools
-        2019*, *Visual Studio Community 2019* and *CMake*.
-
-        -   Visual Studio Build Tools requirements:
-
-            1.  `MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.25)`
-                or later
-            2.  `MSVC v142 - VS 2019 C++ x64/x86 Spectre-mitigated libs (v14.25)`
-                or later
-
-        -   Visual Studio Community 2019 requirements:
-
-            1.  `MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.25)`
-                or later
-            2.  `MSVC v142 - VS 2019 C++ x64/x86 Spectre-mitigated libs (v14.25)`
-                or later
-            3.  `C++ ATL for latest v142 build tools (x86 & x64)` or
-                later
-            4.  `C++ ATL for latest v142 build tools with Spectre Mitigations (x86 & x64)`
-                or later
-
-    -   To configure OBS via `cmake-gui`, set the following variables:
-
-        -   `DISABLE_PYTHON=TRUE`, unless you are not getting errors
-            while trying to build with Python enabled
-
-4.  Compile OBS ShaderFilter Plus, replace `<OBS_BUILD_DIR>` with the
-    path to the directory where you built OBS:
-    `bat     set RUSTFLAGS=-L native=<OBS_BUILD_DIR>\libobs\Debug     cargo build --release`
-
-5.  Move `target/release/libobs_shaderfilter_plus.dll` to the OBS plugin
-    directory. \#\#\#\# Linux
-
-6.  Compile OBS by following [these
-    instructions](https://github.com/obsproject/obs-studio/wiki/Install-Instructions#linux-build-directions).
-
-7.  Add the directory in which `libobs.so` resides to the
-    `LD_LIBRARY_PATH` environment variable.
-
-8.  Install Rust (the package manager Cargo should be bundled with it)
-
-9.  Clone this repository and open it in the terminal
-
-10. Compile using `cargo build --release`
-
-11. Move `target/release/libobs_shaderfilter_plus.so` to the OBS plugin
-    directory.
-
-### Tips on building OBS (fish shell, Ubuntu)
-
-These steps should not be necessary if you just want to compile OBS
-ShaderFilter Plus from source.
-
-Ensure OBS is uninstalled using:
-
-``` {.fish}
-sudo apt remove obs-studio
-```
-
-Compile OBS using:
-
-``` {.fish}
-cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_BROWSER=ON -DCEF_ROOT_DIR="../../cef_binary_3770_linux64" ..; and make -j24; and sudo checkinstall --default --pkgname=obs-studio --fstrans=no --backup=no --pkgversion=(date +%Y%m%d)"-git" --deldoc=yes
-```
-
-Then recompile and install using:
-
-    make -j24; and sudo make install
