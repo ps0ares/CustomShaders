@@ -48,7 +48,7 @@ Shaders are programs executed on the GPU that apply special visual effects to th
     float4 mainImage(VertData v_in) : TARGET
     ```
 
-    with or without an opening bracket at the end. Spaces are irrelevant and the input variable, `v_in`, can be named anything else. If it succedes, it will be assumed that a pixel shader is provided in the file. Otherwise, the following dummy pixel shader will be used:
+    with or without an opening bracket at the end. Spaces are irrelevant and the input variable, `v_in`, can be named anything else. If it succeedes, it will be assumed that a pixel shader is provided in the file. Otherwise, the following dummy pixel shader will be used:
 
     ``` {.hlsl}
     float4 mainImage(VertData v_in) : TARGET
@@ -110,3 +110,45 @@ As presented in the fist table above, five types of variables can be controlled 
 meaning, in this example, that the variable has a minimum value of 0.0, a maximum value of 10.0, can be changed in steps of 1.0 and it should not be controlled by a slider. Any missing parameter will be replaced by a default value.
 
 The initial value for any variable should always be provided in the code.
+
+## 7. License
+
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+
+distribute this software, either in source code form or as a compiled
+
+binary, for any purpose, commercial or non-commercial, and by any
+
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+
+of this software dedicate any and all copyright interest in the
+
+software to the public domain. We make this dedication for the benefit
+
+of the public at large and to the detriment of our heirs and
+
+successors. We intend this dedication to be an overt act of
+
+relinquishment in perpetuity of all present and future rights to this
+
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <http://unlicense.org/>
