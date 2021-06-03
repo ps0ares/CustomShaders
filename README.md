@@ -18,19 +18,6 @@ And so, I turned to the scripting languages that OBS supports and Lua(JIT) becam
 4.  Allows the use of vertex or pixel shaders (see below the conventions adopted)
 5.  Full support of image files (textures)
 
-| Type          |       Controlled in the UI       |
-|:--------------|:--------------------------------:|
-| int           |               Yes                |
-| int2          |                No                |
-| int3          |                No                |
-| int4          |                No                |
-| float         |               Yes                |
-| vec2 / float2 |                No                |
-| vec3 / float3 |                No                |
-| vec4 / float4 |     Yes (treated as a color)     |
-| bool          |               Yes                |
-| texture2d     | Yes (as a path to an image file) |
-
 ## Installation
 
 *Custom Shaders* is a single file script that can be placed anywhere in your filesystem. Add it to OBS on the `Tools` \> `Scripts` menu and it will be ready to use.
@@ -45,11 +32,30 @@ And so, I turned to the scripting languages that OBS supports and Lua(JIT) becam
 
 3.  Customize the behavior of the shader via the shader-specific user interface (UI).
 
+## Examples
+
 Example shaders may be found in the [`examples`](examples) directory of this repository. It is a good starting point for the creation of custom effects.
 
-## Writing Shaders?
+## Writing Shaders
 
-Shaders are programs executed on the GPU. They can be used to apply customizable special visual effects. The shaders used by this plugin are a special subset of shaders called *fragment shaders*. These shaders are executed once for each pixel of the source, every frame. See [Usage Guide](#usage-guide) for examples.
+Shaders are programs executed on the GPU that apply special visual effects to the rendered graphics. The shaders that can used with this plugin are of two types:
+
+-   ***pixel shaders*** that modify attributes of each pixel in every frame.
+
+-   **vertex shaders** that can manipulate properties such as position, color and texture coordinates of a point in 2D or 3D space.
+
+| Type          |       Controlled in the UI       |
+|:--------------|:--------------------------------:|
+| int           |               Yes                |
+| int2          |                No                |
+| int3          |                No                |
+| int4          |                No                |
+| float         |               Yes                |
+| vec2 / float2 |                No                |
+| vec3 / float3 |                No                |
+| vec4 / float4 |     Yes (treated as a color)     |
+| bool          |               Yes                |
+| texture2d     | Yes (as a path to an image file) |
 
 Different graphics interfaces, such as OpenGL and DirectX, use different shader languages with incompatible syntax, so it is important to be aware of the graphics interfaces OBS makes use of.
 
