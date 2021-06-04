@@ -13,7 +13,7 @@ And so, I turned to the scripting languages that OBS supports and Lua(JIT) becam
 ## 2. New features
 
 1.  No compilation and no installation of pre-compiled components are required
-2.  Cross-platform by nature (although it has only be tested under Linux. I'll be glad to receive some feedback from users of other OSes)
+2.  Cross-platform by nature (although it has only be tested under Linux. I'll be glad to receive feedback from users of other OSes)
 3.  Enlarged support of variable types
 4.  Allows the use of vertex or pixel shaders (see below for the conventions adopted)
 5.  Full support of image files (textures)
@@ -26,7 +26,7 @@ And so, I turned to the scripting languages that OBS supports and Lua(JIT) becam
 
 1.  Add a filter to a source by right-clicking a source, going to `Filters`, and adding `Custom Shader`. The following default effect will be immediately applied to let you know that the script is working. This effect will also be used as a fallback if any recoverable error happens when an effect file is loaded.
 
-    ![Default effect](default.webp)
+    ![Default effect](media/default.webp)
 
 2.  Select an effect file by clicking the `Browse` button and picking the file containing the effect source code.
 
@@ -34,11 +34,11 @@ And so, I turned to the scripting languages that OBS supports and Lua(JIT) becam
 
 ## 5. Examples
 
-Example shaders may be found in the [`examples`](examples) directory of this repository. It is a good starting point for the creation of custom effects.
+Example shaders can be found in the [`examples`](examples) directory of this repository. It is a good starting point for the creation of custom effects.
 
 ## 6. Writing Shaders
 
-Shaders are programs executed on the GPU that apply special visual effects to the rendered graphics. The shaders that can used with this plugin are of two types:
+Shaders are programs executed on the GPU that apply special visual effects to the rendered graphics. The shaders that can be used with this plugin are of two types:
 
 -   ***pixel shaders*** that modify attributes of each pixel in every frame.
 
@@ -73,18 +73,18 @@ Shaders are programs executed on the GPU that apply special visual effects to th
 
 ### 6.1 Supported variables (uniforms) types
 
-| Type          |       Controlled in the UI       |
-|:--------------|:--------------------------------:|
-| int           |               Yes                |
-| int2          |                No                |
-| int3          |                No                |
-| int4          |                No                |
-| float         |               Yes                |
-| vec2 / float2 |                No                |
-| vec3 / float3 |                No                |
-| vec4 / float4 |     Yes (treated as a color)     |
-| bool          |               Yes                |
-| texture2d     | Yes (as a path to an image file) |
+| Type          |       Controlled in the UI       |  Default value   |
+|:--------------|:--------------------------------:|:----------------:|
+| int           |               Yes                |                  |
+| int2          |                No                |                  |
+| int3          |                No                |                  |
+| int4          |                No                |                  |
+| float         |               Yes                |                  |
+| vec2 / float2 |                No                |                  |
+| vec3 / float3 |                No                |                  |
+| vec4 / float4 |     Yes (treated as a color)     |    \#00000000    |
+| bool          |               Yes                |      False       |
+| texture2d     | Yes (as a path to an image file) | A fallback image |
 
 ### 6.2 Builtin Variables
 
@@ -94,22 +94,24 @@ To every shader loaded by this script the following uniform variables are added:
 |:----------------------------|:----------------------------------------------------|
 | uniform float4x4 ViewProj;  | Used as the primary view/projection matrix          |
 | uniform texture2d image;    | The source image being filtered                     |
-| uniform float2 uv_size;     | The width and height of the source image, in pixels |
-| uniform float elapsed_time; | The time in seconds since the filter was created    |
-| uniform float3 local_time;  | Your OS local time as (hours, minutes, seconds)     |
-| uniform float rand_f;       | A random number in [0,1] that changes at each frame |
+| uniform float2 iResolution; | The width and height of the source image, in pixels |
+| uniform float iTime;        | The time in seconds since the filter was created    |
+| uniform float3 lTime;       | Your OS local time as (hours, minutes, seconds)     |
+| uniform float rand_f;       | A random float in [0,1] that changes at each frame  |
+
+For each declared *texture2d* variable it will also be included a float2 uniform containing the width and height of the image. For a variable named `myImage` the corresponding size uniform it is called `myImage_size`.
 
 ### 6.3 The user interface
 
-As presented in the fist table above, five types of variables can be controlled in the filter UI. You can further customize the UI elements by including special directives (pragmas) in the effect code. So, for an uniform variable named `speed`, you can write a pragma with up to four parameters:
+As presented in the fist table above, five types of variables can be controlled in the filter UI. The names of those types of variables are capitalised and underscores are replace with spaces in the UI.
+
+You can further customize the UI elements by including special directives (pragmas) in the effect code. So, for an uniform variable named `speed`, you can write a pragma with up to four parameters:
 
 ``` {.hlsl}
 #pragma speed 0.0, 10.0, 1.0, 0
 ```
 
 meaning, in this example, that the variable has a minimum value of 0.0, a maximum value of 10.0, can be changed in steps of 1.0 and it should not be controlled by a slider. Any missing parameter will be replaced by a default value.
-
-The initial value for any variable should always be provided in the code.
 
 ## 7. License
 
