@@ -1,0 +1,105 @@
+// Adapted from:
+// Rainbow shader by Charles Fettinger for obs-shaderfilter plugin 3/2019
+
+#pragma Saturation 0.0, 1.0, 0.01
+#pragma Luminosity 0.0, 1.0, 0.01
+#pragma Spread 0.25, 10.0, 0.01
+#pragma Speed -5.0, 5.0, 0.01
+#pragma Opacity 0.0, 1.0, 0.01
+#pragma Rotation_Offset 0.0, 6.28, 0.01
+#pragma Tolerance 0.0, 2.0, 0.01
+
+uniform float Saturation = 0.8;
+uniform float Luminosity = 0.5;
+uniform float Spread = 3.8;
+uniform float Speed = 2.4;
+uniform float Opacity = 1.0;
+uniform bool Vertical;
+uniform bool Rotational;
+uniform float Rotation_Offset = 0.0;
+uniform bool Apply_To_Image;
+uniform bool Replace_Image_Color;
+uniform bool Apply_To_Specific_Color;
+uniform float4 Color_To_Replace;
+uniform float Tolerance = 0.075;
+
+float hueToRGB(float v1, float v2, float vH) {
+	vH = frac(vH);
+	if ((6.0 * vH) < 1.0) return (v1 + (v2 - v1) * 6.0 * vH);
+	if ((2.0 * vH) < 1.0) return (v2);
+	if ((3.0 * vH) < 2.0) return (v1 + (v2 - v1) * ((0.6666666666666667) - vH) * 6.0);
+	return clamp(v1, 0.0, 1.0);
+}
+
+float4 HSLtoRGB(float4 hsl) {
+	float4 rgb = float4(0.0, 0.0, 0.0, hsl.w);
+	float v1 = 0.0;
+	float v2 = 0.0;
+	
+	if (hsl.y == 0) {
+		rgb.xyz = hsl.zzz;
+	}
+	else {
+		
+		if (hsl.z < 0.5) {
+			v2 = hsl.z * (1 + hsl.y);
+		}
+		else {
+			v2 = (hsl.z + hsl.y) - (hsl.y * hsl.z);
+		}
+		
+		v1 = 2.0 * hsl.z - v2;
+		
+		rgb.x = hueToRGB(v1, v2, hsl.x + (0.3333333333333333));
+		rgb.y = hueToRGB(v1, v2, hsl.x);
+		rgb.z = hueToRGB(v1, v2, hsl.x - (0.3333333333333333));
+		
+	}
+	return rgb;
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+  float2 lPos = v_in.uv / Spread;
+	float time = (iTime * clamp(Speed, -5.0, 5.0)) / Spread;	
+
+	//set colors and direction
+	float hue = (-1 * lPos.x) / 2.0;
+
+	if (Rotational && (Vertical == false))
+	{
+		float timeWithOffset = time + Rotation_Offset;
+		hue = (lPos.x * cos(timeWithOffset) + lPos.y * sin(timeWithOffset)) * 0.5;
+	}
+
+	if (Vertical && (Rotational == false))
+	{
+		hue = (-1 * lPos.y) * 0.5;
+	}	
+
+	hue += time;
+	hue = frac(hue);
+	float4 hsl = float4(hue, Saturation, Luminosity, 1.0);
+	float4 rgba = HSLtoRGB(hsl);
+	
+  float4 color;
+  float4 original_color;
+ 	if (Apply_To_Image)
+	{
+		color = image.Sample(textureSampler, v_in.uv);
+		original_color = color;
+		float luma = dot(color,float4(0.30, 0.59, 0.11, 1.0));
+		if (Replace_Image_Color)
+			color = float4(luma);
+		rgba = lerp(original_color, rgba * color, Opacity);
+		
+	}
+    if (Apply_To_Specific_Color)
+    {
+        color = image.Sample(textureSampler, v_in.uv);
+        original_color = color;
+        color = (distance(color.rgb, Color_To_Replace.rgb) <= Tolerance) ? rgba : color;
+        rgba = lerp(original_color, color, Opacity);
+    }
+	return rgba;
+}

@@ -1,0 +1,12 @@
+// https://www.shadertoy.com/view/lsscRM
+
+#pragma speed 0., 5.
+
+uniform float speed = 2.0;
+
+float4 mainImage(VertData v_in) : TARGET
+{
+	float4 color = image.Sample(textureSampler, v_in.uv);
+  color.bg *= abs(sin(iTime * speed));
+	return color;
+}

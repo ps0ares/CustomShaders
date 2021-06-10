@@ -1,0 +1,31 @@
+// http://glslsandbox.com/e#72199.1
+
+#define TAU 6.28318530718
+#define MAX_ITER 4
+#pragma speed 0.0, 5.0, 0.01
+
+uniform float speed = 1.0;
+uniform float4 color = {0.0, 0.05, 0.15, 1.0};
+
+float4 mainImage(VertData v_in) : TARGET
+{
+	float t = iTime * speed;// * .5 + 23.0;
+  float2 p = mod(v_in.uv * TAU, TAU) - 250.0;
+
+	float2 i = float2(p);
+	float c = 1.0;
+	float inten = .005;
+
+	for (int n = 1; n < MAX_ITER; n++) 
+	{
+		float t = t * (1.0 - (3.5 / float(n+1)));
+		i = p + float2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
+		c += 1.0/length(float2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
+	}
+	c /= float(MAX_ITER);
+	c = 1.17 - pow(c, 1.4);
+	float3 colour = float3(pow(abs(c), 8.0));
+  colour = clamp(colour + color.rgb, 0.0, 1.0);
+
+	return float4(colour, 1.0);
+}

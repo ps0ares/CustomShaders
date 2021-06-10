@@ -1,0 +1,36 @@
+// ???
+
+#pragma density 5.0, 50.0, 1.0
+#pragma speed 0.1, 10.0
+#pragma red -2.0, 2.0, 0.01
+#pragma green -2.0, 2.0, 0.01
+#pragma blue -2.0, 2.0, 0.01
+
+uniform float density = 10.0;
+uniform float speed = 2.5;
+
+uniform float red = .3;
+uniform float green = .8;
+uniform float blue = 1.4;
+
+float random (float2 st) {
+    return fract(tan(dot(st.xy, float2(12.9898, 78.233))) * 438.5453123);
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    float2 uv = v_in.uv;
+    uv.x *= iResolution.x / iResolution.y;
+    uv *= density;
+    float2 gv=fract(uv) - 0.5;
+    float2 id=floor(uv);
+    
+    float ran = random(id);
+    float ran2 = random(id + 64.0);
+    float2 d = abs(gv) - (abs(sin((iTime) * ran) * 0.5) - 0.05);
+    float rect = min(max(d.x, d.y), 0.0) + length(max(d, 0.));
+    float r = step(0., rect);
+    float3 col = float3(1.-r) * float3(abs(sin((iTime * speed) * ran2)) * .8);
+    col *= float3(red, green, blue);
+    return float4(col, 1.0);
+}

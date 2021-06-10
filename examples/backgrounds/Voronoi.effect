@@ -1,0 +1,70 @@
+// https://www.shadertoy.com/view/7lX3Rf
+
+#pragma density 1.0, 10.0, 1.0, true
+#pragma speed .1, 5.0
+
+uniform float density = 5.0;
+uniform float speed = 0.5;
+uniform float4 color = {1.0, 1.0, 1.0, 1.0};
+
+vec2 n22(vec2 p) {
+    vec3 a = fract(p.xyx * vec3(123.34, 234.34, 345.65));
+    a += dot(a, a + 34.45);
+    return fract(vec2(a.x * a.y, a.y * a.z));
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    vec2 uv = density * v_in.uv;
+
+    // Time varying pixel color
+    float m = 0.;
+    float t = iTime * speed;
+    
+    float minDist = 100.;
+    float cellIdx = 0.;
+    
+     vec3 col = color.rgb;
+    
+    if (false) {
+        // Naive approach (less performant)
+        for (float i=0.; i < 50.; i++) {
+            vec2 n = n22(vec2(i));
+            vec2 p = sin(n*t);
+            float d = length(uv-p);
+            m += smoothstep(.02, .01, d);
+
+            if (d < minDist) {
+                minDist = d;
+                cellIdx = i;
+            }
+        }
+    } else {
+        uv *= 2.;
+        vec2 gv = fract(uv) - .5;
+        vec2 id = floor(uv);
+        vec2 cid = vec2(0);
+        
+        for (float y = -1.; y <= 1.; y++) {
+            for (float x = -1.; x <= 1.; x++) {
+                vec2 offs = vec2(x, y);
+                vec2 n = n22(id + offs);
+                vec2 p = offs + sin(n*t)*.5;
+                p -= gv;
+                float ed = length(p); // euclidean distance
+                float md = abs(p.x) + abs(p.y); // manhattan distance
+                //float d =  mix(ed, md, sin(iTime * 2.)*.5 + .5);
+                float d = ed;
+                
+                if (d < minDist) {
+                    minDist = d;
+                    cid = id + offs;
+                }
+            }       
+        }
+        col *= minDist;
+    }
+
+    // Output to screen
+    return vec4(col ,1.0);
+}

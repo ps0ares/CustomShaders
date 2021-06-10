@@ -1,0 +1,46 @@
+// https://www.shadertoy.com/view/XtlSWr
+#pragma Blur_Radius 0.0, 3.0, 0.01
+
+uniform float Blur_Radius = 1.0;
+
+vec3 getTexture(vec2 uv){
+	return image.Sample(textureSampler, uv).rgb;
+}
+
+vec3 KawaseBlur(vec2 uv, vec2 texelSize, vec2 scaleFactor)
+{
+    vec3 res = vec3(0,0,0);
+    vec2 invScaleFactor = vec2(1.0 / scaleFactor.x, 1.0 / scaleFactor.y);
+    vec2 pixelOffset = 1.0 / scaleFactor * Blur_Radius;
+    
+    vec2 downScaleUV = floor(uv * scaleFactor) * invScaleFactor;
+    
+    vec2 uv00 = downScaleUV + vec2(pixelOffset.x + 0.5 * invScaleFactor.x , pixelOffset.y + 0.5 * invScaleFactor.y) * texelSize;
+    vec2 uv01 = downScaleUV + vec2(-pixelOffset.x - 0.5 * invScaleFactor.x, pixelOffset.y + 0.5 * invScaleFactor.y) * texelSize;
+    vec2 uv10 = downScaleUV + vec2(-pixelOffset.x + 0.5 * invScaleFactor.x, -pixelOffset.y - 0.5 * invScaleFactor.y) * texelSize;
+    vec2 uv11 = downScaleUV + vec2(pixelOffset.x - 0.5 * invScaleFactor.x, -pixelOffset.y - 0.5 * invScaleFactor.y) * texelSize;
+    
+    res += getTexture(uv00);
+    res += getTexture(uv01);
+    res += getTexture(uv10);
+    res += getTexture(uv11);
+    
+    return res * 0.25;
+}
+
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    vec2 scaleFactor = vec2(1.0, 1.0);
+    vec2 texelSize = vec2(1.0, 1.0);
+    vec2 uv = v_in.uv;
+    
+    // hack for iteration count,we should just sample smaller texture
+    vec3 col = KawaseBlur(uv, texelSize, iResolution.xy / scaleFactor);
+    col += KawaseBlur(uv, texelSize, iResolution.xy / (scaleFactor * 2.0));
+    col += KawaseBlur(uv, texelSize, iResolution.xy / (scaleFactor * 3.0));
+    col += KawaseBlur(uv, texelSize, iResolution.xy / (scaleFactor * 4.0));
+    // Output to screen
+    return vec4(col * 0.25, 1.0);
+}
+

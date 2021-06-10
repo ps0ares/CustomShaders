@@ -1,0 +1,54 @@
+// https://www.shadertoy.com/view/7ss3Wf
+
+// The noise function from this article: https://iquilezles.org/www/articles/voronoise/voronoise.htm
+
+#pragma speed 0.0, 6.0
+#pragma zoom_factor 0.0, 6.0
+uniform float speed = 3.0;
+uniform float zoom_factor = 1.0;
+
+vec3 hash3(vec2 p)  // replace this by something better
+{
+    float x  = fract( p.x*0.3183099+.1 );
+	x *= fract(x*17.0);
+    float y  = fract( p.y*0.9843579+.1 );
+	y *= fract(y*11.0);
+    float z  = fract( p.x*0.4837598+.1 + p.y*0.5790343+.1 );
+	z *= fract(z*7.0);
+    return vec3( x, y, z );
+}
+
+float noise( vec2 x, float u, float v )
+{
+    vec2 p = floor(x);
+    vec2 f = fract(x);
+
+    float k = 1.0 + 63.0*pow(1.0-v,4.0);
+    float va = 0.0;
+    float wt = 0.0;
+    for( int j=-2; j<=2; j++ )
+    for( int i=-2; i<=2; i++ )
+    {
+        vec2  g = vec2( float(i), float(j) );
+        vec3  o = hash3( p + g )*vec3(u,u,1.0);
+        vec2  r = g - f + o.xy;
+        float d = dot(r,r);
+        float w = pow( 1.0-smoothstep(0.0,1.414,sqrt(d)), k );
+        va += w*o.z;
+        wt += w;
+    }
+
+    return va/wt;
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    float t = iTime*speed;
+    float zoom = 1.0+zoom_factor*noise(vec2(t*0.1), 0.3, 1.0)+0.4*noise(vec2(t*0.4), 0.3, 1.0);
+    vec2 shift =  2.0f*vec2(noise(vec2(t*0.1,-t*0.2), 0.3, 1.0), noise(vec2(-t*0.1,t*0.2), 0.3, 1.0)) - vec2(0.5);
+    shift.y *= 0.5;
+    shift = shift*(zoom-1.0);
+    float scale = 1.0/zoom;
+    
+    return image.Sample(textureSampler, shift+(.5 + -.5 * scale +  v_in.uv * scale));
+}

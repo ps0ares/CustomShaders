@@ -1,0 +1,25 @@
+// Adapted from:
+// pulse effect By Charles Fettinger (https://github.com/Oncorporation)
+
+#pragma speed 0.0, 0.5, 0.01
+#pragma growth 0.0, 3.0, 0.01
+
+uniform float speed = 0.1;
+uniform float growth = 0.5;
+
+VertData mainTransform(VertData v_in)
+{
+	VertData vert_out;
+
+	float3 pos = v_in.pos.xyz;
+	float3 direction_from_center = float3((v_in.uv.x - 0.5) * iResolution.x / iResolution.y, v_in.uv.y - 0.5, 0.);
+	float3 max_pos = pos + direction_from_center * growth * 100;
+
+	float t = (1 + sin(iTime * speed * 100));
+//	float t = 1 + -exp(-2* iTime) * cos( 40 * iTime);
+	float3 current_pos = pos * (1 - t) + max_pos * t;
+
+	vert_out.pos = mul(float4(current_pos, 1.0), ViewProj);
+	vert_out.uv = v_in.uv;
+	return vert_out;
+}

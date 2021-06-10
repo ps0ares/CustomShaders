@@ -1,0 +1,15 @@
+// Paulo Soares 2021
+
+#pragma scale 0.01, 3., 0.01
+#pragma Hor_offset -1., 1., 0.01
+#pragma Ver_offset -1., 1., 0.01
+
+uniform float scale = 1.0;
+uniform float Hor_offset = 0.;
+uniform float Ver_offset = 0.;
+
+float4 mainImage(VertData v_in) : TARGET
+{
+  float2 offset = float2(1. - scale) * 0.5;
+  return image.Sample(textureSampler, (v_in.uv - offset) / scale + float2(Hor_offset, Ver_offset));
+} 

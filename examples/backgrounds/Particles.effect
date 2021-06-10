@@ -1,0 +1,52 @@
+// https://www.shadertoy.com/view/tdVGR1
+
+#pragma speed -5.0, 5.0
+#pragma total 2.0, 15.0
+
+uniform float4 color = {1.0, 1.0, 1.0, 1.0};
+uniform float speed = 0.5;
+uniform float total = 7.;
+
+float rand(float2 p)
+{
+    float3 p3  = fract(float3(p.xyx) * .1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    v_in.uv.x *= float(iResolution.x) / float(iResolution.y);
+    float fCol = 0.;
+    for(float i=1.; i<total; i+=1.){
+        float iTotal = i/total;
+        float niTotal = 1. - i/total;
+                
+        float2 uv = v_in.uv * (10. + i) - float2(0., speed * iTime * (1. - i / total));
+        float2 id = floor(uv) + float2(i * 1000.);
+        uv = fract(uv) - 0.5;
+        
+        for(float y=-1.; y<=1.; y+=1.){
+            for(float x=-1.; x<=1.; x+=1.){   
+                
+                float2 iuv = uv + float2(x, y);    
+                float2 iid = id - float2(x, y);  
+                
+                if(rand(iid * 200.) > .25){
+                    iuv.x += rand(iid) - .5;
+                    iuv.y += rand(float2(rand(iid))) - .5;        
+
+                    float l = length(iuv * (niTotal) * 1.5);  
+                    float size = rand(iid * 5.) * .1 + .25 - .1;
+                    float force = rand(iid * 10.) * .5 + .5;
+                    fCol += 
+                        smoothstep(l, l + (iTotal)*.25, size) *                         
+                        niTotal *
+                        force;        
+                }                         
+            }
+        }        
+    }
+    float4 res = float4(color.r * fCol, color.g * fCol, color.b * fCol,1.);
+    return res;
+}

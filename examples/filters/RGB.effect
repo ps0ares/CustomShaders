@@ -1,0 +1,23 @@
+// Paulo Soares 2021
+
+#pragma red_min 0.0, 1.0, 0.01
+#pragma red_max 0.0, 1.0, 0.01
+#pragma green_min 0.0, 1.0, 0.01
+#pragma green_max 0.0, 1.0, 0.01
+#pragma blue_min 0.0, 1.0, 0.01
+#pragma blue_max 0.0, 1.0, 0.01
+
+uniform float red_min = 0.0;
+uniform float red_max = 1.0;
+uniform float green_min = 0.0;
+uniform float green_max = 1.0;
+uniform float blue_min = 0.0;
+uniform float blue_max = 1.0;
+
+float4 mainImage(VertData v_in) : TARGET
+{
+  float3 rgb_min = float3(red_min, green_min, blue_min);
+  float3 rgb_max = float3(red_max, green_max, blue_max);
+  float4 rgba = image.Sample(textureSampler, v_in.uv);
+  return float4(lerp(rgb_min, rgb_max, rgba.rgb), rgba.a);
+}

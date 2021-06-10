@@ -1,0 +1,57 @@
+// https://www.shadertoy.com/view/lljGDt
+
+#pragma center_x 0.0, 1.0, 0.01
+#pragma center_y -1.0, -0.1, 0.01
+
+uniform float4 light_color = {0.1, 0.3, 0.5, 1.0};
+uniform float center_x = 0.7;
+uniform float center_y = -0.4;
+
+float rayStrength(float2 raySource, float2 rayRefDirection, float2 coord, float seedA, float seedB, float speed)
+{
+	float2 sourceToCoord = coord - raySource;
+	float cosAngle = dot(normalize(sourceToCoord), rayRefDirection);
+	
+	return clamp(
+		(0.45 + 0.15 * sin(cosAngle * seedA + iTime * speed)) +
+		(0.3 + 0.2 * cos(-cosAngle * seedB + iTime * speed)),
+		0.0, 1.0) *
+		clamp((iResolution.x - length(sourceToCoord)) / iResolution.x, 0.5, 1.0);
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+  float2 fragCoord = v_in.uv * iResolution;
+
+	// Set the parameters of the sun rays
+	float2 rayPos1 = float2(iResolution.x * center_x, iResolution.y * center_y);
+	float2 rayRefDir1 = normalize(float2(1.0, -0.116));
+	float raySeedA1 = 36.2214;
+	float raySeedB1 = 21.11349;
+	float raySpeed1 = 1.5;
+	
+	float2 rayPos2 = float2(iResolution.x * (center_x + 0.1), iResolution.y * (center_y - 0.2));
+	float2 rayRefDir2 = normalize(float2(1.0, 0.241));
+	const float raySeedA2 = 22.39910;
+	const float raySeedB2 = 18.0234;
+	const float raySpeed2 = 1.1;
+	
+	// Calculate the colour of the sun rays on the current fragment
+	float4 rays1 = float4(1.0) *
+		rayStrength(rayPos1, rayRefDir1, fragCoord, raySeedA1, raySeedB1, raySpeed1);
+	 
+	float4 rays2 = float4(1.0) *
+		rayStrength(rayPos2, rayRefDir2, fragCoord, raySeedA2, raySeedB2, raySpeed2);
+	
+	float4 fragColor = rays1 * 0.5 + rays2 * 0.4;
+	
+	// Attenuate brightness towards the bottom, simulating light-loss due to depth.
+	// Give the whole thing a blue-green tinge as well.
+	float brightness = 1.0 - v_in.uv.y;
+	fragColor.x *= light_color.r + (brightness * 0.8);
+	fragColor.y *= light_color.g + (brightness * 0.6);
+	fragColor.z *= light_color.b + (brightness * 0.5);
+	
+  float4 color = image.Sample(textureSampler, v_in.uv);
+  return fragColor + color;
+}

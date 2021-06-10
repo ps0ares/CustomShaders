@@ -1,0 +1,23 @@
+// Paulo Soares 2021
+
+#pragma rows 1, 32
+uniform int rows = 4;
+
+sampler_state def_sampler {
+	Filter   = Linear;
+	AddressU = Repeat;
+	AddressV = Repeat;
+};
+
+VertData mainTransform(VertData v_in)
+{
+	VertData vert_out;
+	vert_out.pos = mul(float4(v_in.pos.xyz, 1 ), ViewProj);
+	vert_out.uv  = v_in.uv * rows;
+	return vert_out;
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+	return image.Sample(def_sampler, v_in.uv);
+}

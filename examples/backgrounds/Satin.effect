@@ -1,0 +1,26 @@
+// http://glslsandbox.com/e#70537.0
+
+#define PI 3.14159265359
+
+#pragma red .0, 2.0, 0.01
+#pragma green .0, 2.0, 0.01
+#pragma blue .0, 2.0, 0.01
+
+uniform float red = .4;
+uniform float green = .7;
+uniform float blue = 1.0;
+
+float4 mainImage(VertData v_in) : TARGET
+{
+  float2 p = v_in.uv;
+  float4 color = float4(1.0);
+  float l = 0.0;
+
+  for(float i = 1.0; i < 7.0; i++){
+    p.x += 0.1 / i * cos(i * 8.0 * p.y + iTime + sin(iTime / 75.0));
+    p.y += 0.1 / i * sin(i * 12.0 * p.x + iTime + cos(iTime / 120.0));
+    l = length(float2(0, p.y + sin(p.x * PI * i * sin(iTime / 3.0))));
+  }
+  float g = 1.0 - pow(l, 0.9);
+  return float4(g * red, g * green, g * blue, 0.6);
+}

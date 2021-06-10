@@ -1,0 +1,141 @@
+// https://www.shadertoy.com/view/tllyz7
+//   Segment numbers
+//   ===============
+//
+//		 0
+//		###
+//	   #   #
+//	  1#   #2
+//	   # 3 #
+//		###
+//	   #   #
+//	  4#   #5
+//	   #   #
+//		###
+//		 6
+
+#pragma Hor_pos -1., 1., 0.01
+#pragma Ver_pos -1., 1., 0.01
+#pragma scale 0., 10.
+
+uniform float4 color = {0.0, 1.0, 0.0, 1.0};
+uniform float Hor_pos = 0.0;
+uniform float Ver_pos = 0.0;
+uniform float scale = 5.0;
+uniform bool show_seconds;
+
+float segment(vec2 uv,int o){
+    float d = o==1 ? abs(uv.x):abs(uv.y);
+   
+    d = smoothstep(0.11,0.101,d);
+    d *= smoothstep(0.49,0.488,abs(uv.x+uv.y));
+    d *= smoothstep(0.49,0.488,abs(uv.x-uv.y));
+    
+    return d;
+}
+
+float digit(vec2 uv,int n){
+    float d = 0.0;
+    float b = .2; // brightness
+    uv *= 2.4;
+    // segment 0
+    if(n!=1 && n!=4){
+    	d += segment(uv-vec2(0.0,1.0),0);
+    } else {
+        d += segment(uv-vec2(0.0,1.0),0)*b;
+    }
+    // segment 1
+    if (n!=1 && n!=2 && n!=3 && n!=7){
+    	d += segment(uv-vec2(-0.5,0.5),1);
+    } else {
+        d += segment(uv-vec2(-0.5,0.5),1)*b;
+    }
+    // segment 2
+    if (n!=5 && n!=6){ 
+    	d += segment(uv-vec2(0.5),1);
+    } else {
+        d += segment(uv-vec2(0.5),1)*b;
+    }
+    // segment 3
+    if (n!=0 && n!=1 && n!=7){
+    	d += segment(uv,0);
+    } else {
+        d += segment(uv,0)*b;
+    }
+    // segment 4
+    if(n==0 || n==2 || n==6 || n==8){
+    	d += segment(uv-vec2(-0.5),1);
+    } else {
+        d += segment(uv-vec2(-0.5),1)*b;
+    }
+    // segment 5
+    if(n!=2){
+    	d += segment(uv-vec2(0.5,-0.5),1);
+    } else {
+        d += segment(uv-vec2(0.5,-0.5),1)*b;
+    }
+    // segment 6
+    if(n!=1 && n!=4 && n!=7){
+    	d += segment(uv-vec2(0.0,-1.0),0);
+    } else {
+        d += segment(uv-vec2(0.0,-1.0),0)*b;
+    }
+    return d;
+}
+
+float box(vec2 uv){
+    float d = smoothstep(0.05,0.045, abs(uv.x)) * smoothstep(0.05,0.045, abs(uv.y));
+    return d;
+}
+
+float colon(vec2 uv, float sec){
+  if (mod(sec, 2.0) == 0.0) {
+    float d = box(uv-vec2(0.0,0.2));
+    d += box(uv-vec2(0.0,-0.2));
+    return d;
+  } else return 0.0;
+}
+
+float clock(vec2 uv){
+    float d = 0.0;
+    float delta = 0.7;
+    float hour = lTime.x;
+    float minute = lTime.y;
+    float second = lTime.z;
+    if (show_seconds) delta = 0.0;
+        
+    d += digit(uv-vec2(-1.7 + delta,0.0),int(floor(hour/10.0)));
+    d += digit(uv-vec2(-1.1 + delta,0.0),int(floor(mod(hour,10.0))));
+    
+    d += colon(uv-vec2(-0.7 + delta,0.0), second);
+    
+    d += digit(uv-vec2(-0.3 + delta,0.0),int(floor(minute/10.0)));
+    d += digit(uv-vec2(0.3 + delta,0.0),int(floor(mod(minute,10.0))));
+    
+    if (show_seconds) {
+      d+= colon(uv-vec2(0.7,0.0), second);
+    
+      d += digit(uv-vec2(1.1,0.0),int(floor(second/10.0)));
+      d += digit(uv-vec2(1.7,0),int(floor(mod(second,10.0))));    
+    }
+    
+    return d;
+}
+
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    // Normalized pixel coordinates and adjust aspect ratio
+    vec2 uv = (v_in.uv - float2(Hor_pos, -Ver_pos) - 0.5);
+    uv.y *= iResolution.y / iResolution.x;
+    uv *= (40. - 3.6 * scale); 
+    
+    float d = clock(float2(uv.x,-uv.y));
+    
+    // Output to screen
+    if ( d == 1.) {
+      return vec4(color.rgb * d, 1.0);
+    } else {
+      return image.Sample(textureSampler, v_in.uv);
+    }
+}

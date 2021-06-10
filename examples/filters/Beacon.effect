@@ -1,0 +1,38 @@
+// ???
+
+#define PI 3.14159265359
+#define PI2 6.28318530717
+
+#pragma center_x .0, 1.0, 0.01
+#pragma center_y .0, 1.0, 0.01
+#pragma speed 0.1, 1.5, 0.05
+
+uniform float4 color = {0.3, 0.5, 0.7, 1.0};
+uniform float center_x = 0.5;
+uniform float center_y = 0.5;
+uniform float speed = 0.75;
+
+float4 mainImage(VertData v_in) : TARGET
+{
+  float2 uv = v_in.uv;
+  uv -= float2(center_x, 1.0 - center_y);
+  uv.y *= iResolution.y / iResolution.x;
+	float ang = atan(uv.x, uv.y);
+	float dist = length(uv);
+	float4 output;
+	output.rgb = color.rgb * (pow(dist, -1.0) * 0.05);
+	for (float ray = 0.5; ray < 5.0; ray += 1.) {
+		float rayang = iTime * ray * speed;
+		rayang = mod(rayang, PI2);
+		if (rayang < ang - PI) {rayang += PI2;}
+		if (rayang > ang + PI) {rayang -= PI2;}
+		float brite = .3 - abs(ang - rayang);
+		brite -= dist * 0.2;
+		if (brite > 0.0) {
+			output.rgb += float3(0.2 + 0.4 * ray, 0.4 + 0.4 * ray, 0.5 + 0.4 * ray) * brite;
+		}
+	}
+	output.a = 1.0;
+  output += image.Sample(textureSampler, v_in.uv);
+	return output;
+}

@@ -1,0 +1,32 @@
+// Adapted from Exeldro
+// https://github.com/exeldro/obs-lua/blob/master/fisheye.shader
+
+#pragma center_x 0.0, 1.0, 0.01
+#pragma center_y 0, 1.0, 0.01
+#pragma power -2.0, 2.0, 0.01
+
+uniform float center_x = 0.5;
+uniform float center_y= 0.5;
+uniform float power = 0.0;
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    float2 center_pos = float2(center_x, center_y);
+    float b = 0.0;
+    if (power > 0.0) {
+        b = sqrt(dot(center_pos, center_pos));
+    } else {
+        if (iResolution.x > iResolution.y) {
+            b = center_pos.x;
+        } else {
+            b = center_pos.y;
+        }
+    }
+    float2 uv = v_in.uv ;
+    if (power > 0.0001) {
+        uv = center_pos  + normalize(v_in.uv - center_pos) * tan(distance(center_pos, v_in.uv) * power) * b / tan( b * power);
+    } else if (power < -0.0001) {
+        uv = center_pos  - normalize(v_in.uv - center_pos) * atan(distance(center_pos, v_in.uv) * power * 2.0) * b / atan(-power * b * 2.0);
+    }
+    return image.Sample(textureSampler, uv);
+}

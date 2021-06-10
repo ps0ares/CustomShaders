@@ -1,0 +1,19 @@
+// ????
+
+float f(float3 x){
+  x.z += iTime;
+	x.x += 2.6 + sin(iTime);
+	x.y += 2.6 + cos(iTime);
+  float a = x.z * 0.1;
+  x.xy *= mat2(cos(a), sin(a), -sin(a), cos(a));
+  return (0.054 - length(cos(x.xy) + sin(x.yz)));
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+  float3 p = float3(0.0);
+  for(int t=0; t<32; t++) {
+    p += f(p) * (0.5 - float3(v_in.uv, 1.0));
+  }
+  return float4((float3(1., 2.0, 4.) + sin(p)) / length(p), 1.0);
+}

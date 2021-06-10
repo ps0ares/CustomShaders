@@ -1,0 +1,46 @@
+// Adapted from https://github.com/exeldro/obs-lua/blob/master/rounded_rect.shader
+
+#pragma corner_radius 0., 1., 0.01
+#pragma border_thickness 0., 1.01, 0.01
+#pragma border_opacity 0.0, 1.0, 0.01
+
+uniform float corner_radius = 0.;
+uniform float border_thickness = 0.;
+uniform float4 border_color;
+uniform float border_opacity = 1.0;
+uniform bool use_background_image;
+uniform texture2d background = "wood.png";
+
+sampler_state repeat_sampler {
+	Filter   = Linear;
+	AddressU = Repeat;
+	AddressV = Repeat;
+};
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    float2 mirrored_tex_coord = float2(0.5) - abs(v_in.uv - float2(0.5));
+    float4 output = image.Sample(textureSampler, v_in.uv);
+    float4 border_element = border_color;
+    
+    float max_dist = 0.5 * min(iResolution.x, iResolution.y);
+    float cr = corner_radius * max_dist;
+    float bt = border_thickness * max_dist;
+    float2 pixel_position = mirrored_tex_coord * iResolution;
+    float pixel_distance_from_center = distance(pixel_position, float2(cr));
+    
+    bool is_in_corner = pixel_position.x < cr && pixel_position.y < cr;
+    bool is_within_radius = pixel_distance_from_center <= cr - bt;
+    
+    bool is_within_edge_border = !is_in_corner && (pixel_position.x < bt || pixel_position.y < bt);
+    bool is_within_corner_border = is_in_corner && pixel_distance_from_center > cr - bt && pixel_distance_from_center <= cr;
+    
+    if (use_background_image) {
+      border_element = background.Sample(repeat_sampler, v_in.uv * (iResolution / background_size));
+    }
+    float4 border = mix(output , border_element, border_opacity) * float(is_within_edge_border || is_within_corner_border);
+    
+    output = output * float((!is_in_corner || is_within_radius) && (pixel_position.x >= bt) && (pixel_position.y >= bt)) + border;
+    
+    return output;
+}

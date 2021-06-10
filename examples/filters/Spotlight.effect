@@ -1,0 +1,32 @@
+// Adapted from:
+// Spotlight By Charles Fettinger (https://github.com/Oncorporation)  4/2019
+
+#define PI 3.14159265359
+
+#pragma center_x .0, 1.0, 0.01
+#pragma center_y .0, 1.0, 0.01
+#pragma inner_radius .0, 1.0, 0.01
+#pragma outer_radius 0.01, 5.0, 0.01
+#pragma speed 0.0, 1.0, 0.01
+
+uniform float center_x = 0.5;
+uniform float center_y = 0.5;
+uniform float inner_radius = 0.5;
+uniform float outer_radius = 1.0;
+uniform float speed = 0.0;
+
+float4 mainImage(VertData v_in) : TARGET
+{
+  float2 center;
+  if (speed > 0.0) {
+    center = float2((sin(iTime * speed * PI * 0.667) * .5 + .5) * iResolution.x, (cos(iTime * speed * PI) * .5 + .5) * iResolution.y);
+  } else {
+    center = float2(center_x * iResolution.x, (1.0 - center_y) * iResolution.y);
+  }
+  float2 pos = float2(v_in.uv.x * iResolution.x, v_in.uv.y * iResolution.y);
+  float max_dist = 0.5 * min(iResolution.x, iResolution.y);
+  float dist = distance(pos, center);
+  float4 color = image.Sample(textureSampler, v_in.uv);
+  float alpha = (1.0 - smoothstep(inner_radius * max_dist, (outer_radius + inner_radius) * max_dist, dist)) * color.a;
+  return float4(color.rgb, alpha);
+}

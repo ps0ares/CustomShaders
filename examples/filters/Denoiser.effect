@@ -1,0 +1,73 @@
+/*
+FAST APPROXIMATION OF https://www.shadertoy.com/view/3dd3Wr
+
+[
+This project did NOT use any code from the /\ above, I was creating this
+whilst comparing its visuals to the above project
+]
+
+Boi if anybody uses this script you better not change the name of the function
+
+By: Sir Bird / Zerofile
+
+*/
+
+#pragma DISTRIBUTION_BIAS .01, 1.0, 0.01
+#pragma PIXEL_MULTIPLIER 1.0, 3.0, 0.01
+#pragma INVERSE_HUE_TOLERANCE 2.0, 30.0
+
+#define SAMPLES 80.
+
+uniform float DISTRIBUTION_BIAS=0.6;
+uniform float PIXEL_MULTIPLIER =1.5;
+uniform float INVERSE_HUE_TOLERANCE=20.0; 
+
+#define GOLDEN_ANGLE 2.3999632 //3PI-sqrt(5)PI
+
+#define sample2D mat2(cos(GOLDEN_ANGLE),sin(GOLDEN_ANGLE),-sin(GOLDEN_ANGLE),cos(GOLDEN_ANGLE))
+#define powfix(a,b) pow(max(a,0.),b)
+
+vec4 sirBirdDenoise(vec2 uv, vec2 imageResolution) {
+    vec4 denoisedColor           = vec4(0.);
+    
+    float sampleRadius     = sqrt(SAMPLES);
+    float sampleTrueRadius = 0.5/(sampleRadius*sampleRadius);
+    vec2        samplePixel      = vec2(1.0/imageResolution.x,1.0/imageResolution.y); 
+    vec4        sampleCenter     = image.Sample(textureSampler, uv);
+    vec4        sampleCenterNorm = normalize(sampleCenter);
+    float       sampleCenterSat  = length(sampleCenter);
+    
+    float  influenceSum = 0.0;
+    float brightnessSum = 0.0;
+    
+    vec2 pixelRotated = vec2(0.,1.);
+    
+    for (float x = 0.0; x <= SAMPLES; x++) {
+        
+        pixelRotated *= sample2D;
+        
+        vec2  pixelOffset    = PIXEL_MULTIPLIER*pixelRotated*sqrt(x)*0.5;
+        float pixelInfluence = 1.0-sampleTrueRadius*powfix(dot(pixelOffset,pixelOffset),DISTRIBUTION_BIAS);
+        pixelOffset *= samplePixel;
+            
+        vec4 thisDenoisedColor = image.Sample(textureSampler, uv + pixelOffset);
+
+        pixelInfluence      *= pixelInfluence*pixelInfluence;
+        /*
+            HUE + SATURATION FILTER
+        */
+        pixelInfluence      *=   
+            powfix(0.5+0.5*dot(sampleCenterNorm,normalize(thisDenoisedColor)),INVERSE_HUE_TOLERANCE)
+            * powfix(1.0 - abs(length(thisDenoisedColor)-length(sampleCenterSat)),8.);
+            
+        influenceSum += pixelInfluence;
+        denoisedColor += thisDenoisedColor*pixelInfluence;
+    }
+    
+    return denoisedColor/influenceSum;
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    return sirBirdDenoise(v_in.uv, iResolution);
+}

@@ -1,0 +1,35 @@
+//https://www.shadertoy.com/view/flfGW8
+
+#pragma n 1.0, 10.0, 1.0, true
+
+uniform float n = 3.0;
+uniform float4 color = {0.2, 0.4, 1.0, 1.0};
+
+float rand(vec2 p) {
+	return fract(sin(dot(p, vec2(12.543,514.123)))*4732.12);
+}
+
+float noise(vec2 p) {
+	vec2 f = smoothstep(0.0, 1.0, fract(p));
+	vec2 i = floor(p);
+	
+	float a = rand(i);
+	float b = rand(i+vec2(1.0,0.0));
+	float c = rand(i+vec2(0.0,1.0));
+	float d = rand(i+vec2(1.0,1.0));
+	
+	return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+	
+}
+
+float4 mainImage(VertData v_in) : TARGET
+{
+    vec2 uv = v_in.uv;
+    vec2 uvp = v_in.uv;
+    uv += 0.75*noise(uv*3.0+iTime/2.0+noise(uv*7.0-iTime/3.0)/2.0)/2.0;
+    float grid = (mod(floor((uvp.x)*iResolution.x/n),2.0)==0.0?1.0:0.0)*(mod(floor((uvp.y)*iResolution.y/n),2.0)==0.0?1.0:0.0);
+    vec3 col = mix(vec3(0), color.rgb, 5.0*vec3(pow(1.0-noise(uv*4.0-vec2(0.0, iTime/2.0)),5.0)));
+    col *= grid;
+    col = pow(col, vec3(1.0/2.2));
+    return vec4(col, 1.0);
+}

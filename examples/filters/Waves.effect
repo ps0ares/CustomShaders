@@ -1,0 +1,41 @@
+// ???
+
+#define PI2 6.28318530717
+
+#pragma frequency 0.0, 3.0 , 0.01
+#pragma num_of_waves 0, 20
+
+// Params = (wave frequency in Hz, number of waves per unit distance)
+uniform float frequency = 1.0;
+uniform int num_of_waves = 15;
+	
+// Simple circular wave function
+float wave(float2 pos, float t, float2 center) {
+	float d = length(pos - center);
+	d = log(1.0 + exp(d));
+	return 1.0/(1.0 + 20.0 * d * d) *
+		   sin(PI2 *(-num_of_waves * d + t * frequency));
+}
+
+// This height map combines a couple of waves
+float height(float2 pos, float t) {
+	float w;
+	w =  wave(pos, t, float2(0.5, -0.5));
+	w += wave(pos, t, -float2(0.5, -0.5));
+	return w;
+}
+
+// Discrete differentiation
+float2 normal(float2 pos, float t) {
+	return 	float2(height(pos - float2(0.01, 0), t) - height(pos, t), 
+				 height(pos - float2(0, 0.01), t) - height(pos, t));
+}
+
+// Simple ripple effect
+float4 mainImage(VertData v_in) : TARGET
+{
+  float2 uv = v_in.uv;
+	float2 uvn = 2.0 * uv - float2(1.0);	
+	uv += normal(uvn, iTime);
+	return image.Sample(textureSampler, float2(1.0-uv.x, uv.y));
+}
