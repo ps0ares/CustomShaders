@@ -6,7 +6,7 @@ Custom Shaders is a LUA script for Open Broadcaster Software (OBS) that can be u
 
 This script was inspired by the *filter-custom* included in [DarkLink's Script Pack](https://obsproject.com/forum/resources/darklinks-script-pack.655/) and builds upon the features provided by the [obs-shaderfilter](https://obsproject.com/forum/resources/obs-shaderfilter.775/) and the [OBS ShaderFilter Plus](https://obsproject.com/forum/resources/obs-shaderfilter-plus.929/) plugins.
 
-As a Linux user I couldn't use *obs-shaderfilter* because it is only supported for Windows and a tentative compilation lead to nowhere. *OBS ShaderFilter Plus* works very well under Linux and, in some ways, is an improved version of *obs-shaderfilter* but the fact of it being written in Rust, a programming language that is still gaining popularity, makes it very dependent of its developer and casts some shadows over its future.
+As a Linux user I couldn't use *obs-shaderfilter* because it is only supported for Windows and a tentative compilation lead to nowhere. *OBS ShaderFilter Plus* works very well under Linux and, in some ways, is an improved version of *obs-shaderfilter* but it seems its development is uncertain and I don't know Rust.
 
 And so, I turned to the scripting languages that OBS supports and Lua(JIT) became the natural candidate over Python.
 
@@ -34,11 +34,13 @@ And so, I turned to the scripting languages that OBS supports and Lua(JIT) becam
 
 ## 5. Examples
 
-Example shaders can be found in the [`examples`](examples) directory of this repository. It is a good starting point for the creation of custom effects.
+Example shaders can be found in the [`examples`](examples) directory of this repository.
 
 ## 6. Writing Shaders
 
-Shaders are programs executed on the GPU that apply special visual effects to the rendered graphics. The shaders that can be used with this plugin are of two types:
+Shaders are programs executed on the GPU that apply special visual effects to the rendered graphics. They can be written in GLSL (OpenGL) or HLSL (DirectX), among other languages. OBS uses its own limited version of HLSL
+
+The shaders that can be used with this plugin are of two types:
 
 -   ***pixel shaders*** that modify attributes of each pixel in every frame.
 
@@ -73,18 +75,18 @@ Shaders are programs executed on the GPU that apply special visual effects to th
 
 ### 6.1 Supported variables (uniforms) types
 
-| Type          |       Controlled in the UI       |  Default value   |
-|:--------------|:--------------------------------:|:----------------:|
-| int           |               Yes                |                  |
-| int2          |                No                |                  |
-| int3          |                No                |                  |
-| int4          |                No                |                  |
-| float         |               Yes                |                  |
-| vec2 / float2 |                No                |                  |
-| vec3 / float3 |                No                |                  |
-| vec4 / float4 |     Yes (treated as a color)     |    \#00000000    |
-| bool          |               Yes                |      False       |
-| texture2d     | Yes (as a path to an image file) | A fallback image |
+| Type          |       Controlled in the UI       |             Default value             |
+|:--------------|:--------------------------------:|:-------------------------------------:|
+| int           |               Yes                |                                       |
+| int2          |                No                |                                       |
+| int3          |                No                |                                       |
+| int4          |                No                |                                       |
+| float         |               Yes                |                                       |
+| vec2 / float2 |                No                |                                       |
+| vec3 / float3 |                No                |                                       |
+| vec4 / float4 |     Yes (treated as a color)     |              \#00000000               |
+| bool          |               Yes                |                 false                 |
+| texture2d     | Yes (as a path to an image file) | ![Falback image](media/fallback.webp) |
 
 ### 6.2 Builtin Variables
 
@@ -95,11 +97,11 @@ To every shader loaded by this script the following uniform variables are added:
 | uniform float4x4 ViewProj;  | Used as the primary view/projection matrix          |
 | uniform texture2d image;    | The source image being filtered                     |
 | uniform float2 iResolution; | The width and height of the source image, in pixels |
-| uniform float iTime;        | The time in seconds since the filter was created    |
+| uniform float iTime;        | The time since the filter was created, in seconds   |
 | uniform float3 lTime;       | Your OS local time as (hours, minutes, seconds)     |
 | uniform float rand_f;       | A random float in [0,1] that changes at each frame  |
 
-For each declared *texture2d* variable it will also be included a float2 uniform containing the width and height of the image. For a variable named `myImage` the corresponding size uniform it is called `myImage_size`.
+For each declared *texture2d* variable it will also be included a float2 uniform containing the width and height of the image. For a variable named `myImage` the corresponding size uniform will be called `myImage_size`.
 
 ### 6.3 The user interface
 
@@ -119,7 +121,7 @@ This is free and unencumbered software released into the public domain.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or distribute this software, either in source code form or as a compiled binary, for any purpose, commercial or non-commercial, and by any means.
 
-In jurisdictions that recognize copyright laws, the author or authorsof this software dedicate any and all copyright interest in the software to the public domain. We make this dedication for the benefit of the public at large and to the detriment of our heirs and successors. We intend this dedication to be an overt act of relinquishment in perpetuity of all present and future rights to this software under copyright law.
+In jurisdictions that recognize copyright laws, the author or authors of this software dedicate any and all copyright interest in the software to the public domain. We make this dedication for the benefit of the public at large and to the detriment of our heirs and successors. We intend this dedication to be an overt act of relinquishment in perpetuity of all present and future rights to this software under copyright law.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
