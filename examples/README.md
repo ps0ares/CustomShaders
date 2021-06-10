@@ -1,6 +1,6 @@
 # Example shaders
 
-The examples are divided into two groups: `filters` that change in some way the OBS source to which they are applied and `backgrounds` that replace an OBS source with some animated graphics. The latter can be used as a background image if you use some kind of background removal such as a green screen.
+The examples are divided into two groups: `filters` that change in some way the OBS source to which they are applied and `backgrounds` that replace an OBS source with some animated graphics. The latter can be used as background animations if you use some kind of background removal such as a green screen.
 
 ## Filters
 
